@@ -48,11 +48,12 @@ class HDFSCommands:
         response = requests.get(f'{self._get_url()}?user.name={self.user}&op=LISTSTATUS')
         for file in response.json().get('FileStatuses').get('FileStatus'):
             if file.get('type') == 'FILE':
-                print(Fore.WHITE + file.get("pathSuffix") + Style.RESET_ALL)
+                print(Fore.WHITE + file.get("pathSuffix"), end=' ')
             elif file.get('type') == 'DIRECTORY':
-                print(Fore.BLUE + file.get("pathSuffix") + Style.RESET_ALL)
+                print(Fore.BLUE + file.get("pathSuffix"), end=' ')
             elif file.get('type') == 'SYMLINK':
-                print(Fore.RED + file.get("pathSuffix") + Style.RESET_ALL)
+                print(Fore.RED + file.get("pathSuffix"), end=' ')
+        print()
     
        
     def put(self, filename):
