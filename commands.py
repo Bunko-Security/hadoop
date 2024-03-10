@@ -117,6 +117,13 @@ class HDFSCommands:
             print(f'{dirname} не dir')
     
        
+    def help(self):
+        with open('help.txt','r') as f:
+            help_list = f.read().split('\n')
+            for command in help_list:
+                print(' '+Fore.BLUE+command.split(' ')[0]+ Style.RESET_ALL+' ' +' '.join(command.split(' ')[1:]))
+
+
     def execute(self, args):
         match args[0]:
             case 'mkdir': 
@@ -164,5 +171,7 @@ class HDFSCommands:
                     print('Неверная команда')
                 else:
                     self.lcd(args[1])
+            case '?':
+                self.help()
             case _:
                 print(f'Команда {args[0]} не существует')
