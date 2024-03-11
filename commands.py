@@ -101,11 +101,12 @@ class HDFSCommands:
     def lls(self):
         for i in self.local_pwd.iterdir():
             if i.is_file():
-                print(f'{i.name} = файл')
+                print(Fore.WHITE + i.name, end=' ')
             elif i.is_dir():
-                print(f'{i.name} = директория')
+                print(Fore.BLUE + i.name, end=' ')
             elif i.is_symlink():
-                print(f'{i.name} = ссылка')
+                print(Fore.RED + i.name, end=' ')
+        print()
                 
     
     def lcd(self, dirname):
