@@ -16,12 +16,18 @@ def main():
     
     hdfs = HDFSCommands(args.host, args.port, args.user)
     while True:
-        command = input('\n' + Fore.GREEN + Style.BRIGHT + f'''hdfs~{hdfs.hdfs_pwd}\n''' + 
-                        Fore.YELLOW + f'''local~{hdfs.local_pwd}\n''' + 
-                        Fore.WHITE + Style.NORMAL + f'''({args.user}@{args.host}:{args.port})$ ''' + Style.RESET_ALL)
+        command = input(
+            '\n' + 
+            Fore.GREEN + Style.BRIGHT + f'''hdfs~{hdfs.hdfs_pwd}''' + Style.RESET_ALL + '''\n''' +
+            Fore.YELLOW + Style.BRIGHT +f'''local~{hdfs.local_pwd}''' + Style.RESET_ALL + '''\n''' +
+            Fore.WHITE + Style.NORMAL + f'''({args.user}@{args.host}:{args.port})$ ''' + Style.RESET_ALL
+        )
         if command == 'exit':
             break
-        hdfs.execute(command.split())
+        elif '\\' in command or '/' in command:
+            print('Слэши не поддерживаются')
+        else:
+            hdfs.execute(command.split())
 
 
 if __name__ == '__main__':
