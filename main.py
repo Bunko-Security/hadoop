@@ -24,7 +24,10 @@ def main():
         )
         if command == 'exit':
             break
-        hdfs.execute(command.split())
+        elif '\\' in command or '/' in command:
+            print('Слэши не поддерживаются')
+        else:
+            hdfs.execute(command.split())
 
 
 if __name__ == '__main__':

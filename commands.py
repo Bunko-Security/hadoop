@@ -3,7 +3,7 @@ import pathlib
 from colorama import Fore, Style
 
 
-# Проверка доступа?
+
 class HDFSCommands:
     # https://hadoop.apache.org/docs/r2.10.2/hadoop-project-dist/hadoop-hdfs/WebHDFS.html
     
@@ -34,11 +34,11 @@ class HDFSCommands:
         
         response = requests.get(f'{self._get_url()}{dirname}?user.name={self.user}&op=GETFILESTATUS')
         if response.status_code != 200:
-            print(f'{dirname} нет таких')
+            print(f'{self.hdfs_pwd + "/" + dirname} не директория')
             return
         
         if response.json().get('FileStatus').get('type') != 'DIRECTORY':
-            print(f'{dirname} не dir')
+            print(f'{self.hdfs_pwd + "/" + dirname} не директория')
             return
         
         self.hdfs_pwd = self.hdfs_pwd + '/' + dirname
@@ -48,42 +48,58 @@ class HDFSCommands:
         response = requests.get(f'{self._get_url()}?user.name={self.user}&op=LISTSTATUS')
         for file in response.json().get('FileStatuses').get('FileStatus'):
             if file.get('type') == 'FILE':
-                print(Fore.WHITE + file.get("pathSuffix"), end=' ')
+                print(Fore.WHITE + file.get('pathSuffix'), end=' ')
             elif file.get('type') == 'DIRECTORY':
-                print(Fore.BLUE + file.get("pathSuffix"), end=' ')
+                print(Fore.BLUE + file.get('pathSuffix'), end=' ')
             elif file.get('type') == 'SYMLINK':
-                print(Fore.RED + file.get("pathSuffix"), end=' ')
+                print(Fore.RED + file.get('pathSuffix'), end=' ')
         print()
     
        
     def put(self, filename):
-        with open(self.local_pwd.joinpath(filename), 'rb') as file: # FileNotFoundError
-            response = requests.put(f'{self._get_url()}{filename}?user.name={self.user}&op=CREATE', allow_redirects=True, data=file)
-            if response.status_code == 201:
-                print(f'Файл {filename} создан')
-            elif response.status_code == 403:
-                print(f'Файл {filename} уже создан')
-            else:
-                print('Что-то пошло не так')
-                print(response.json())
+        try:
+            path = self.local_pwd.joinpath(filename)
+            with open(path, 'rb') as file:
+                response = requests.put(f'{self._get_url()}{filename}?user.name={self.user}&op=CREATE', allow_redirects=True, data=file)
+                if response.status_code == 201:
+                    print(f'Файл {filename} создан')
+                elif response.status_code == 403:
+                    print(f'Файл {filename} уже создан')
+                else:
+                    print('Что-то пошло не так')
+                    print(response.json())
+        except FileNotFoundError:
+            print(f'Файл {path} не существует')
+        
     
-                
-    # Проверить существование файла в HDFS
     def append(self, local_filename, hdfs_filename):
-        with open(self.local_pwd.joinpath(local_filename), 'rb') as file: # FileNotFoundError
-            response = requests.post(f'{self._get_url()}{hdfs_filename}?user.name={self.user}&op=APPEND', allow_redirects=True, data=file)
-            if response.status_code == 200:
-                print(f'OK')
-            else:
-                print('Что-то пошло не так')
-                print(response.json())
+        response = requests.get(f'{self._get_url()}{hdfs_filename}?user.name={self.user}&op=GETFILESTATUS')
+        
+        if response.status_code != 200:
+            print(f'{self.hdfs_pwd + "/"} не существует')
+            return
+        elif response.json().get('FileStatus').get('type') != 'FILE':
+            print(f'{self.hdfs_pwd + "/"} не файл')
+            return
+        
+        try:
+            path = self.local_pwd.joinpath(local_filename)
+            with open(self.local_pwd.joinpath(local_filename), 'rb') as file:
+                response = requests.post(f'{self._get_url()}{hdfs_filename}?user.name={self.user}&op=APPEND', allow_redirects=True, data=file)
+                
+                if response.status_code == 200:
+                    print(f'Конкатенация успешна')
+                else:
+                    print('Что-то пошло не так')
+                    print(response.json())
+        except FileNotFoundError:
+            print(f'Файл {path} не существует')
     
-    
-    # Удалить директорию можно?
+
     def delete(self, filename):
         response = requests.delete(f'{self._get_url()}{filename}?user.name={self.user}&op=DELETE')
         if response.json().get('boolean'):
-            print(f'Файл {filename} удален')
+            print(f'{filename} удален')
         else:
             print(f'Файл не может быть удален')
     
@@ -115,14 +131,17 @@ class HDFSCommands:
         elif self.local_pwd.joinpath(dirname).is_dir():
             self.local_pwd = self.local_pwd.joinpath(dirname)
         else:
-            print(f'{dirname} не dir')
+            print(f'{self.local_pwd.joinpath(dirname)} не директория')
     
        
     def help(self):
-        with open('help.txt','r') as f:
+        help_path = pathlib.Path(__file__).parent
+        with open(help_path.joinpath('help.txt'),'r' ,encoding='utf-8') as f:
             help_list = f.read().split('\n')
-            for command in help_list:
-                print(' '+Fore.BLUE+command.split(' ')[0]+ Style.RESET_ALL+' ' +' '.join(command.split(' ')[1:]))
+        
+        for command in help_list:
+            text = command.split(' ')
+            print(' ' + Fore.BLUE + text[0] + Style.RESET_ALL + ' ' + ' '.join(text[1:]))
 
 
     def execute(self, args):
