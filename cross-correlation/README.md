@@ -24,3 +24,8 @@ chmod +x ./pre-start.sh
 ```bash
 ./createdirs.sh
 ```
+
+Запуск генератора чеков:
+```bash
+python checks_creator.py <количество чеков>
+```
