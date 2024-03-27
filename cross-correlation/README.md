@@ -27,5 +27,10 @@ chmod +x ./pre-start.sh
 
 Запуск генератора чеков:
 ```bash
-python checks_creator.py <количество чеков>
+python checks_creator.py <Host> <Port> <Username> <количество чеков>
+```
+
+Запуск клиента:
+```bash
+python client.py <выбранный метод> <продукт> [-H HOST] [-P PORT] [-U USERNAME]
 ```

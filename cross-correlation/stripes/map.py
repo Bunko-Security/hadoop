@@ -3,7 +3,7 @@ import sys
 import json
 
 for line in sys.stdin:
-    items = line.strip().split(' ')
+    items = line.strip().split(';')
     for item1 in items:
         H = {}
         for item2 in items:
@@ -12,11 +12,11 @@ for line in sys.stdin:
                     H[item2] = 1
                 else:
                     H[item2] += 1
-        print(item1, '\t', json.dumps(H))
+        print(item1, '\t', json.dumps(H), sep='')
         
 
 # for line in sys.stdin:
-#     items = line.strip().split(' ')
+#     items = line.strip().split(';')
 #     items.sort()
 #     for index1, item1 in enumerate(items):
 #         H = {}
