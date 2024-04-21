@@ -5,7 +5,6 @@ from colorama import Fore, Style
 from commands import HDFSCommands
 
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('host', type=str, help='Сервер')
